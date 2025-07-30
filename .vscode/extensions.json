@@ -1,6 +1,7 @@
 {
-  "recommendations": [
-    "shopify.polaris-for-vscode",
-    "lokalise.i18n-ally"
-  ]
+    "recommendations": [
+        "myml.vscode-markdown-plantuml-preview",
+        "esbenp.prettier-vscode",
+        "jebbs.plantuml"
+    ]
 }
