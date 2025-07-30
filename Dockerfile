@@ -9,20 +9,14 @@ EXPOSE 3000
 # Set working directory
 WORKDIR /app
 
-# Copy package files first for better caching
-COPY package*.json ./
-COPY web/package*.json ./web/
+# Copy everything
+COPY . .
 
-# Install dependencies
-RUN npm install --production || echo "No root package.json"
+# Install only web dependencies (skip root)
 WORKDIR /app/web
 RUN npm install --production
 
-# Copy application code
-WORKDIR /app
-COPY . .
-
-# Build frontend
+# Install and build frontend
 WORKDIR /app/web/frontend
 RUN npm install
 RUN npm run build
