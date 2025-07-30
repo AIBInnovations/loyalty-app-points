@@ -5,27 +5,25 @@ ENV SHOPIFY_API_KEY=$SHOPIFY_API_KEY
 
 EXPOSE 3000
 WORKDIR /app
+COPY . .
 
-# Copy only the web directory (backend)
-COPY web ./web
+# Use yarn to avoid npm dependency issues
+RUN npm install -g yarn
 
-# Install only the essential dependencies manually
+# Install web dependencies with yarn
 WORKDIR /app/web
-RUN npm init -y
-RUN npm install express@4.18.2 mongoose@7.5.0 dotenv@16.3.1 cors@2.8.5
-RUN npm install @shopify/shopify-app-express@5.0.8
-RUN npm install cross-env@7.0.3
+RUN rm -f package-lock.json
+RUN yarn install --production
 
-# Copy your source files
-COPY web/index.js ./
-COPY web/database.js ./
-COPY web/gdpr.js ./
-COPY web/shopify.js ./
-COPY web/models ./models/
-COPY web/routes ./routes/
-COPY web/webhooks ./webhooks/
+# Make sure package.json has "type": "module"
+RUN node -e "const pkg=require('./package.json'); pkg.type='module'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2))"
 
-# Create a simple start script
-RUN echo '{"scripts":{"serve":"cross-env NODE_ENV=production node index.js"}}' > package.json
+# Install and build frontend
+WORKDIR /app/web/frontend
+RUN rm -f package-lock.json
+RUN yarn install
+RUN yarn build
 
-CMD ["npm", "run", "serve"]
+# Start from web directory
+WORKDIR /app/web
+CMD ["yarn", "serve"]
