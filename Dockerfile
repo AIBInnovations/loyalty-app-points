@@ -7,23 +7,19 @@ EXPOSE 3000
 WORKDIR /app
 COPY . .
 
-# Use yarn to avoid npm dependency issues
-RUN npm install -g yarn
-
-# Install web dependencies with yarn
+# Install web dependencies
 WORKDIR /app/web
 RUN rm -f package-lock.json
-RUN yarn install --production
+RUN npm install --legacy-peer-deps --production
 
-# Make sure package.json has "type": "module"
+# Ensure package.json has "type": "module"
 RUN node -e "const pkg=require('./package.json'); pkg.type='module'; require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2))"
 
 # Install and build frontend
 WORKDIR /app/web/frontend
 RUN rm -f package-lock.json
-RUN yarn install
-RUN yarn build
+RUN npm install --legacy-peer-deps
+RUN npm run build
 
-# Start from web directory
 WORKDIR /app/web
-CMD ["yarn", "serve"]
+CMD ["npm", "run", "serve"]
