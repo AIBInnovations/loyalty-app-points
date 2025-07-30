@@ -1,4 +1,4 @@
-FROM node:20-alpine
+FROM node:20.10.0-alpine
 
 ARG SHOPIFY_API_KEY
 ENV SHOPIFY_API_KEY=$SHOPIFY_API_KEY
@@ -9,23 +9,24 @@ EXPOSE 3000
 # Set working directory
 WORKDIR /app
 
-# Copy the entire project first
+# Copy package files first for better caching
+COPY package*.json ./
+COPY web/package*.json ./web/
+
+# Install dependencies
+RUN npm install --production || echo "No root package.json"
+WORKDIR /app/web
+RUN npm install --production
+
+# Copy application code
+WORKDIR /app
 COPY . .
 
-# Install root dependencies (if package.json exists in root)
-RUN npm install || echo "No root package.json found"
-
-# Install web (backend) dependencies
-WORKDIR /app/web
-RUN npm install
-
-# Install frontend dependencies and build
+# Build frontend
 WORKDIR /app/web/frontend
 RUN npm install
 RUN npm run build
 
-# Go back to web directory for starting the app
+# Start from web directory
 WORKDIR /app/web
-
-# Use the existing 'serve' script for production
 CMD ["npm", "run", "serve"]
