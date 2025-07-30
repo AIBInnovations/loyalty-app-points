@@ -7,13 +7,11 @@ EXPOSE 3000
 WORKDIR /app
 COPY . .
 
-# Clean install for web dependencies
 WORKDIR /app/web
-RUN npm ci --only=production
+RUN npm install --production
 
-# Clean install for frontend
 WORKDIR /app/web/frontend
-RUN npm ci
+RUN npm install
 RUN npm run build
 
 WORKDIR /app/web
